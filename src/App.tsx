@@ -1,10 +1,19 @@
-import React from "react";
-import { Area, Container, Header, PhotoList, ScreenWarning } from "./styles";
+import React, { FormEvent } from "react";
+import {
+  Area,
+  Container,
+  Header,
+  PhotoList,
+  ScreenWarning,
+  UploadForm,
+} from "./styles";
 import * as Photos from "./services/photos";
 import { Photo } from "./types/Photo";
 import PhotoItem from "./components/PhotoItem";
+import { getDownloadURL } from "firebase/storage";
 
 const App = () => {
+  const [uploading, setUploading] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [photos, setPhotos] = React.useState<Photo[]>([]);
 
@@ -13,15 +22,33 @@ const App = () => {
       setLoading(true);
       setPhotos(await Photos.getAll());
       setLoading(false);
-      console.log(photos);
     };
     getPhotos();
   }, []);
+
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    //Aqui verificamos se tem arquivo selecionado, se não tiver, não iremos fazer nada!
+    const formData = new FormData(e.currentTarget); //Aqui pegamos o formulário
+    //Preciso ajudar o ts a identificar que o meu file abaixo é um File, pois ele pode ser tanto um File como um null.(INTERESSANTE)
+    const file = formData.get("image") as File; //Aqui pegamos o campo image do nosso primeiro input a baixo.
+
+    //Validando se o arquivo existe e se não está corrompido.
+    if (file && file.size > 0) {
+      setUploading(true);
+    }
+  };
 
   return (
     <Container>
       <Area>
         <Header>Galeria de Fotos</Header>
+
+        <UploadForm method="POST" onSubmit={handleFormSubmit}>
+          <input type={"file"} name={"image"} />
+          <input type={"submit"} name={"Enviar"} />
+        </UploadForm>
+
         {loading && (
           <ScreenWarning>
             <div className="emoji">🤚</div>
