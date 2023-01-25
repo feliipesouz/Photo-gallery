@@ -26,7 +26,7 @@ const App = () => {
     getPhotos();
   }, []);
 
-  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     //Aqui verificamos se tem arquivo selecionado, se não tiver, não iremos fazer nada!
     const formData = new FormData(e.currentTarget); //Aqui pegamos o formulário
@@ -36,6 +36,15 @@ const App = () => {
     //Validando se o arquivo existe e se não está corrompido.
     if (file && file.size > 0) {
       setUploading(true);
+      let result = await Photos.insertFile(file);
+      setLoading(false);
+
+      if (result instanceof Error) {
+        alert(`${result.name} - ${result.message}`);
+      } else {
+        let newPhotoList = [...photos, result];
+        setPhotos(newPhotoList);
+      }
     }
   };
 
