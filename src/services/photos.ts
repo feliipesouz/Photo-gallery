@@ -4,8 +4,8 @@ import {
   ref,
   listAll,
   getDownloadURL,
-  updateMetadata,
-  uploadBytes,
+  deleteObject,
+  uploadBytes
 } from "firebase/storage";
 import { v4 as createId } from "uuid"; //Essa lib possui vários recursos, um deles é o v4, que gera um hash aleatório.
 
@@ -39,7 +39,7 @@ ANOTAÇÕES:
 export const insertFile = async (file: File) => {
   if (["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
     let randomName = createId();
-    let newFile = ref(storage, `images/${randomName}`);
+    let newFile = ref(storage, `images/${randomName}`); //Crio a referência
 
     let upload = await uploadBytes(newFile, file);
 
@@ -54,3 +54,8 @@ export const insertFile = async (file: File) => {
     return new Error("Tipo de arquivo não permitido!");
   }
 };
+
+export const deleteFile = async (name: string) => {
+  let referenceDelete = ref(storage, `images/${name}`)
+  await deleteObject(referenceDelete);
+}
